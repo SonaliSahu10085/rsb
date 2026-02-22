@@ -1,611 +1,602 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Voice Form Pro - Smart Speech Input</title>
     <style>
-        :root {
-            --primary: #4f46e5;
-            --primary-glow: rgba(79, 70, 229, 0.4);
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --success: #22c55e;
-            --error: #ef4444;
-            --active-bg: #f0f9ff;
-            --bot-speaking: #8b5cf6;
+      :root {
+        --primary: #4f46e5;
+        --primary-glow: rgba(79, 70, 229, 0.4);
+        --bg: #f8fafc;
+        --card-bg: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --border: #e2e8f0;
+        --success: #22c55e;
+        --error: #ef4444;
+        --active-bg: #f0f9ff;
+        --bot-speaking: #8b5cf6;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif;
+      }
+
+      body {
+        background-color: var(--bg);
+        color: var(--text-main);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 550px;
+        background: var(--card-bg);
+        padding: 2.5rem;
+        border-radius: 1.5rem;
+        box-shadow:
+          0 20px 25px -5px rgba(0, 0, 0, 0.1),
+          0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        position: relative;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      header h1 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.025em;
+      }
+
+      header p {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+      }
+
+      .live-transcription-container {
+        position: relative;
+        margin-bottom: 2rem;
+      }
+
+      .live-transcription {
+        background: #f1f5f9;
+        border-radius: 1rem;
+        padding: 1.25rem;
+        min-height: 100px;
+        border: 2px solid var(--border);
+        font-style: italic;
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        line-height: 1.5;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        overflow-wrap: break-word;
+      }
+
+      .live-transcription.active {
+        border-color: var(--primary);
+        background: var(--active-bg);
+        color: var(--text-main);
+        font-style: normal;
+        box-shadow: 0 0 0 4px var(--primary-glow);
+      }
+
+      .live-transcription.bot-speaking {
+        border-color: var(--bot-speaking);
+        background: #f5f3ff;
+        color: var(--bot-speaking);
+      }
+
+      .form-group {
+        margin-bottom: 1.25rem;
+        transition: all 0.3s ease;
+      }
+
+      label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 700;
+        margin-bottom: 0.4rem;
+        color: var(--text-main);
+      }
+
+      input {
+        width: 100%;
+        padding: 0.8rem 1.1rem;
+        border: 2px solid var(--border);
+        border-radius: 0.75rem;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        outline: none;
+        background: #fff;
+      }
+
+      input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px var(--primary-glow);
+      }
+
+      .field-intent {
+        border-color: var(--primary) !important;
+        background-color: var(--active-bg) !important;
+        transform: translateY(-2px);
+      }
+
+      .field-success {
+        border-color: var(--success) !important;
+        background-color: #f0fdf4 !important;
+      }
+
+      .controls {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: 2rem;
+      }
+
+      .mic-btn {
+        width: 75px;
+        height: 75px;
+        border-radius: 50%;
+        border: none;
+        background: var(--primary);
+        color: white;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 10px 15px -3px var(--primary-glow);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        z-index: 10;
+      }
+
+      .mic-btn svg {
+        width: 30px;
+        height: 30px;
+      }
+
+      .mic-btn.listening {
+        background: var(--error);
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        70% {
+          transform: scale(1.1);
+          box-shadow: 0 0 0 20px rgba(239, 68, 68, 0);
         }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
+        100% {
+          transform: scale(1);
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
         }
+      }
 
-        .container {
-            width: 100%;
-            max-width: 550px;
-            background: var(--card-bg);
-            padding: 2.5rem;
-            border-radius: 1.5rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            position: relative;
-        }
+      .status-text {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
 
-        header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
+      .hints-container {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 0.75rem;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        border: 1px solid var(--border);
+        line-height: 1.4;
+      }
 
-        header h1 {
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.025em;
-        }
+      #notification {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        background: #1e293b;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        transition: transform 0.4s ease;
+        z-index: 1000;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
 
-        header p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-        }
+      #notification.show {
+        transform: translateX(-50%) translateY(0);
+      }
 
-        .live-transcription-container {
-            position: relative;
-            margin-bottom: 2rem;
-        }
+      .btn-submit {
+        width: 100%;
+        margin-top: 1rem;
+        padding: 0.875rem;
+        border-radius: 0.875rem;
+        border: none;
+        background: #1e293b;
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
 
-        .live-transcription {
-            background: #f1f5f9;
-            border-radius: 1rem;
-            padding: 1.25rem;
-            min-height: 100px;
-            border: 2px solid var(--border);
-            font-style: italic;
-            color: var(--text-muted);
-            font-size: 1.1rem;
-            line-height: 1.5;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            overflow-wrap: break-word;
-        }
+      .btn-submit:hover {
+        background: #0f172a;
+      }
 
-        .live-transcription.active {
-            border-color: var(--primary);
-            background: var(--active-bg);
-            color: var(--text-main);
-            font-style: normal;
-            box-shadow: 0 0 0 4px var(--primary-glow);
-        }
-
-        .live-transcription.bot-speaking {
-            border-color: var(--bot-speaking);
-            background: #f5f3ff;
-            color: var(--bot-speaking);
-        }
-
-        .form-group {
-            margin-bottom: 1.25rem;
-            transition: all 0.3s ease;
-        }
-
-        label {
-            display: block;
-            font-size: 0.85rem;
-            font-weight: 700;
-            margin-bottom: 0.4rem;
-            color: var(--text-main);
-        }
-
-        input {
-            width: 100%;
-            padding: 0.8rem 1.1rem;
-            border: 2px solid var(--border);
-            border-radius: 0.75rem;
-            font-size: 1rem;
-            transition: all 0.2s ease;
-            outline: none;
-            background: #fff;
-        }
-
-        input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px var(--primary-glow);
-        }
-
-        .field-intent {
-            border-color: var(--primary) !important;
-            background-color: var(--active-bg) !important;
-            transform: translateY(-2px);
-        }
-
-        .field-success {
-            border-color: var(--success) !important;
-            background-color: #f0fdf4 !important;
-        }
-
-        .controls {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.75rem;
-            margin-top: 2rem;
-        }
-
-        .mic-btn {
-            width: 75px;
-            height: 75px;
-            border-radius: 50%;
-            border: none;
-            background: var(--primary);
-            color: white;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 10px 15px -3px var(--primary-glow);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 10;
-        }
-
-        .mic-btn svg { width: 30px; height: 30px; }
-
-        .mic-btn.listening {
-            background: var(--error);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
-            70% { transform: scale(1.1); box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
-
-        .status-text {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .hints-container {
-            margin-top: 1.5rem;
-            padding: 1rem;
-            background: #f8fafc;
-            border-radius: 0.75rem;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            border: 1px solid var(--border);
-            line-height: 1.4;
-        }
-
-        #notification {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: #1e293b;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 2rem;
-            font-size: 0.875rem;
-            transition: transform 0.4s ease;
-            z-index: 1000;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-
-        #notification.show { transform: translateX(-50%) translateY(0); }
-
-        .btn-submit {
-            width: 100%;
-            margin-top: 1rem;
-            padding: 0.875rem;
-            border-radius: 0.875rem;
-            border: none;
-            background: #1e293b;
-            color: white;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-submit:hover { background: #0f172a; }
-
-        .unsupported-message {
-            display: none;
-            color: var(--error);
-            background: #fef2f2;
-            padding: 1rem;
-            border-radius: 0.75rem;
-            text-align: center;
-            margin-bottom: 1.5rem;
-            border: 1px solid var(--error);
-        }
+      .unsupported-message {
+        display: none;
+        color: var(--error);
+        background: #fef2f2;
+        padding: 1rem;
+        border-radius: 0.75rem;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--error);
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <div class="container">
-        <div id="unsupported" class="unsupported-message">
-            ⚠️ <strong>Speech API Not Supported.</strong> Please use Chrome or Edge on desktop.
+      <div id="unsupported" class="unsupported-message">
+        ⚠️ <strong>Speech API Not Supported.</strong> Please use Chrome or Edge
+        on desktop.
+      </div>
+
+      <header>
+        <h1>Voice Form Pro</h1>
+        <p>Guided & Smart Speech Input</p>
+      </header>
+
+      <div class="live-transcription-container">
+        <div id="liveTranscription" class="live-transcription">
+          Tap the microphone to begin...
+        </div>
+      </div>
+
+      <form
+        id="voiceForm"
+        autocomplete="off"
+        onsubmit="handleFinalSubmit(event)"
+      >
+        <div class="form-group" id="group-fullName">
+          <label for="fullName">Full Name</label>
+          <input type="text" id="fullName" placeholder="Waiting for input..." />
         </div>
 
-        <header>
-            <h1>Voice Form Pro</h1>
-            <p>Guided & Smart Speech Input</p>
-        </header>
-
-        <div class="live-transcription-container">
-            <div id="liveTranscription" class="live-transcription">
-                Tap the microphone to begin...
-            </div>
+        <div class="form-group" id="group-phone">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" placeholder="Waiting for input..." />
         </div>
 
-        <form id="voiceForm" autocomplete="off" onsubmit="handleFinalSubmit(event)">
-            <div class="form-group" id="group-fullName">
-                <label for="fullName">Full Name</label>
-                <input type="text" id="fullName" placeholder="Waiting for input...">
-            </div>
-
-            <div class="form-group" id="group-phone">
-                <label for="phone">Phone Number</label>
-                <input type="tel" id="phone" placeholder="Waiting for input...">
-            </div>
-
-            <div class="form-group" id="group-email">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" placeholder="Waiting for input...">
-            </div>
-
-            <div class="form-group" id="group-address">
-                <label for="address">Full Address</label>
-                <input type="text" id="address" placeholder="Waiting for input...">
-            </div>
-
-            <button type="submit" class="btn-submit">Submit Form</button>
-        </form>
-
-        <div class="controls">
-            <button id="micBtn" class="mic-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
-            </button>
-            <div id="statusText" class="status-text">Ready</div>
+        <div class="form-group" id="group-email">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" placeholder="Waiting for input..." />
         </div>
 
-        <div class="hints-container">
-            <strong>Voice Shortcuts:</strong><br>
-            • "Clear form" to start over.<br>
-            • "Submit" to send form.<br>
-            • Or just answer the questions as they come.
+        <div class="form-group" id="group-address">
+          <label for="address">Full Address</label>
+          <input type="text" id="address" placeholder="Waiting for input..." />
         </div>
+
+        <button type="submit" class="btn-submit">Submit Form</button>
+      </form>
+
+      <div class="controls">
+        <button id="micBtn" class="mic-btn">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+            <line x1="12" x2="12" y1="19" y2="22" />
+          </svg>
+        </button>
+        <div id="statusText" class="status-text">Ready</div>
+      </div>
+
+      <!-- <div class="hints-container">
+        <strong>Voice Shortcuts:</strong><br />
+        • "Clear form" or "Reset form" to start over.<br />
+        • "Submit" or "Finish" to send form.<br />
+        • Or just answer the questions as they come.
+      </div> -->
+      <div class="hints-container">
+        <strong>Note:</strong>
+        Only supported to chrome browswer for now.
+      </div>
     </div>
 
     <div id="notification">Notification message</div>
 
     <script>
-        const micBtn = document.getElementById('micBtn');
-        const statusText = document.getElementById('statusText');
-        const liveBox = document.getElementById('liveTranscription');
-        const notification = document.getElementById('notification');
-        
-        const inputs = {
-            fullName: document.getElementById('fullName'),
-            phone: document.getElementById('phone'),
-            email: document.getElementById('email'),
-            address: document.getElementById('address')
+      /**
+       * VOICE FORM PRO - FIXED SEQUENTIAL FLOW
+       * Strict: Speak → Listen → Stop → Next
+       */
+
+      // DOM
+      const micBtn = document.getElementById("micBtn");
+      const statusText = document.getElementById("statusText");
+      const liveBox = document.getElementById("liveTranscription");
+      const notification = document.getElementById("notification");
+
+      const inputs = {
+        fullName: document.getElementById("fullName"),
+        phone: document.getElementById("phone"),
+        email: document.getElementById("email"),
+        address: document.getElementById("address"),
+      };
+
+      const steps = [
+        { id: "fullName", question: "Enter full name." },
+        { id: "phone", question: "Enter phone number." },
+        { id: "email", question: "Enter email address." },
+        { id: "address", question: "Enter full address." },
+      ];
+
+      // State
+      let recognition = null;
+      let stepIndex = 0;
+      let isListening = false;
+      let isBotSpeaking = false;
+
+      /* ---------------- SPEECH SYNTHESIS ---------------- */
+
+      function speak(text, callback) {
+        window.speechSynthesis.cancel();
+        isBotSpeaking = true;
+
+        liveBox.innerText = text;
+        liveBox.classList.add("bot-speaking");
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "en-US";
+
+        utterance.onend = () => {
+          isBotSpeaking = false;
+          liveBox.classList.remove("bot-speaking");
+          liveBox.innerText = "Listening...";
+          if (callback) callback();
         };
 
-        const steps = [
-            { id: "fullName", question: "Please tell me your full name" },
-            { id: "phone", question: "What is your phone number?" },
-            { id: "email", question: "What is your email address?" },
-            { id: "address", question: "Lastly, what is your address?" }
-        ];
+        window.speechSynthesis.speak(utterance);
+      }
 
-        let stepIndex = -1;
-        let isListening = false;
-        let recognition = null;
-        let isGuided = false;
-        let isBotSpeaking = false;
-        let restartTimeout = null;
+      /* ---------------- SPEECH RECOGNITION ---------------- */
 
-        // 🔊 Text-to-Speech with State Management
-        function speak(text) {
-            isBotSpeaking = true;
-            window.speechSynthesis.cancel(); 
-            liveBox.classList.add('bot-speaking');
-            liveBox.innerText = text;
+      function initRecognition() {
+        const SpeechRecognition =
+          window.SpeechRecognition || window.webkitSpeechRecognition;
 
-            const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = 'en-IN';
-            msg.rate = 1.0;
-            
-            msg.onend = () => {
-                isBotSpeaking = false;
-                liveBox.classList.remove('bot-speaking');
-                if (isListening) {
-                    liveBox.innerText = "Listening...";
-                }
-            };
-            
-            window.speechSynthesis.speak(msg);
+        if (!SpeechRecognition) {
+          document.getElementById("unsupported").style.display = "block";
+          return null;
         }
 
-        // 🎤 Initialize Recognition
-        function initRecognition() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                document.getElementById('unsupported').style.display = 'block';
-                return null;
-            }
+        const rec = new SpeechRecognition();
+        rec.lang = "en-US";
+        rec.continuous = false; // VERY IMPORTANT (no auto looping)
+        rec.interimResults = false;
 
-            const rec = new SpeechRecognition();
-            rec.lang = 'en-IN';
-            rec.continuous = true;
-            rec.interimResults = true;
+        rec.onstart = () => {
+          isListening = true;
+          micBtn.classList.add("listening");
+          statusText.innerText = "Listening...";
+        };
 
-            rec.onstart = () => {
-                isListening = true;
-                micBtn.classList.add('listening');
-                statusText.innerText = "Listening...";
-                liveBox.classList.add('active');
-            };
+        rec.onresult = (event) => {
+          if (isBotSpeaking) return;
 
-            rec.onresult = (event) => {
-                let interimTranscript = '';
-                let finalTranscript = '';
+          const transcript = event.results[0][0].transcript
+            .trim()
+            .toLowerCase();
+          processFinalResult(transcript);
+        };
 
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    const transcriptPiece = event.results[i][0].transcript.toLowerCase().trim();
-                    if (event.results[i].isFinal) {
-                        finalTranscript += transcriptPiece;
-                        handleSpeech(transcriptPiece, true);
-                    } else {
-                        interimTranscript += transcriptPiece;
-                        handleSpeech(transcriptPiece, false);
-                    }
-                }
-                
-                if (!isBotSpeaking) {
-                    liveBox.innerText = interimTranscript || finalTranscript || "Listening...";
-                }
-            };
+        rec.onend = () => {
+          isListening = false;
+          micBtn.classList.remove("listening");
+          statusText.innerText = "Ready";
+        };
 
-            rec.onend = () => {
-                if (isListening) {
-                    clearTimeout(restartTimeout);
-                    restartTimeout = setTimeout(() => {
-                        try { if (isListening) rec.start(); } catch(e) {}
-                    }, 400); 
-                } else {
-                    micBtn.classList.remove('listening');
-                    statusText.innerText = "Ready";
-                    liveBox.classList.remove('active');
-                    clearHighlights();
-                }
-            };
+        return rec;
+      }
 
-            rec.onerror = (event) => {
-                if (event.error === 'network') {
-                    showNotification("Syncing speech data...");
-                } else if (event.error !== 'no-speech' && event.error !== 'aborted') {
-                    showNotification(`Status: ${event.error}`);
-                }
-            };
+      function startListening() {
+        if (!recognition) recognition = initRecognition();
+        try {
+          recognition.start();
+        } catch (e) {}
+      }
 
-            return rec;
+      /* ---------------- CORE LOGIC ---------------- */
+
+      function processFinalResult(text) {
+        text = text.toLowerCase().trim();
+
+        console.log("Voice Input:", text); // Debugging
+
+        // RESET COMMAND
+        if (text.includes("reset") || text.includes("clear")) {
+          showNotification("🔄 Resetting Form...");
+          resetForm(true);
+          return;
         }
 
-        /**
-         * Core Logic: Handles both NLP Intent mapping and Guided Flow
-         */
-        function handleSpeech(text, isFinal) {
-            if (!text || isBotSpeaking) return;
-
-            // Global Commands
-            if (isFinal && (text.includes("clear form") || text.includes("reset form"))) {
-                Object.values(inputs).forEach(i => i.value = "");
-                stepIndex = 0;
-                showNotification("Form Cleared");
-                askQuestion();
-                return;
-            }
-
-            if (isFinal && (text.includes("submit") || text.includes("summit") || text.includes("finish") || text.includes("done"))) {
-                handleFinalSubmit();
-                return;
-            }
-
-            // 1. Smart Intent Detection (Parallel to Guided Flow)
-            let detectedField = null;
-
-            // Email Parsing
-            const emailPart = text.replace(/\s+at\s+the\s+rate\s+/g, '@').replace(/\s+at\s+/g, '@').replace(/\s+dot\s+/g, '.').replace(/\s+/g, '');
-            const emailMatch = emailPart.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi);
-            if (emailMatch) {
-                fillField('email', emailMatch[0], isFinal);
-                detectedField = 'email';
-            }
-
-            // Phone Parsing
-            const phoneMatch = text.replace(/\D/g, '').match(/\d{10}/);
-            if (phoneMatch) {
-                fillField('phone', phoneMatch[phoneMatch.length - 1], isFinal);
-                detectedField = 'phone';
-            }
-
-            // Name Intent
-            if (text.includes("name is") || text.includes("i am")) {
-                const name = text.split(/name is|i am/)[1]?.trim();
-                if (name && name.length > 1) {
-                    fillField('fullName', capitalize(name), isFinal);
-                    detectedField = 'fullName';
-                }
-            }
-
-            // Address Intent
-            if (text.includes("address is") || text.includes("live in")) {
-                const addr = text.split(/address is|live in/)[1]?.trim();
-                if (addr && addr.length > 2) {
-                    fillField('address', capitalize(addr), isFinal);
-                    detectedField = 'address';
-                }
-            }
-
-            // 2. Guided Flow Logic (If no specific intent detected, fill current step)
-            if (isGuided && isFinal) {
-                // If we detected a field specifically, and it wasn't the current step, 
-                // we check if we should still move forward in the guide.
-                if (detectedField) {
-                    // Find the next empty field in the steps
-                    const nextEmptyIndex = steps.findIndex((s, idx) => idx > stepIndex && !inputs[s.id].value);
-                    if (nextEmptyIndex !== -1) {
-                        stepIndex = nextEmptyIndex - 1; // prepare for the increment in the timeout
-                    }
-                } else {
-                    // Normal guided filling
-                    const currentId = steps[stepIndex].id;
-                    fillField(currentId, capitalize(text), true);
-                }
-
-                // Advance the guide
-                setTimeout(() => {
-                    advanceGuide();
-                }, 1200);
-            }
+        // SUBMIT COMMAND
+        if (text.includes("submit") || text.includes("finish")) {
+          showNotification("📤 Submitting Form...");
+          handleFinalSubmit();
+          return;
         }
 
-        function advanceGuide() {
-            // Find the first empty step to ask about
-            const nextStep = steps.findIndex(s => !inputs[s.id].value);
-            if (nextStep !== -1) {
-                stepIndex = nextStep;
-                askQuestion();
-            } else {
-                isGuided = false;
-                speak("All fields are filled. You can review the form or say submit.");
-                showNotification("✅ Form Ready");
-                clearHighlights();
-            }
+        if (stepIndex >= steps.length) return;
+
+        const current = steps[stepIndex];
+        let value = text;
+
+        if (current.id === "phone") {
+          value = text.replace(/\D/g, "").slice(0, 10);
         }
 
-        function askQuestion() {
-            if (stepIndex < 0 || stepIndex >= steps.length) return;
-            const question = steps[stepIndex].question;
-            speak(question);
-            highlightCurrentField();
+        if (current.id === "email") {
+          value = text
+            .replace(/\s/g, "")
+            .replace(/attherate|at/g, "@")
+            .replace(/dot/g, ".");
         }
 
-        function fillField(id, value, isFinal) {
-            const el = inputs[id];
-            if (!el) return;
-            
-            if (id === 'phone') value = value.replace(/\D/g, '').slice(-10);
-            if (id === 'email') value = value.toLowerCase().replace(/\s/g, '');
-
-            el.value = value;
-            if (isFinal) {
-                el.classList.add('field-success');
-                setTimeout(() => el.classList.remove('field-success'), 1500);
-            }
+        if (current.id === "email") {
+          inputs[current.id].value = lowercase(value);
+        } else {
+          inputs[current.id].value = capitalize(value);
         }
 
-        function highlightCurrentField() {
-            clearHighlights();
-            const id = steps[stepIndex]?.id;
-            if (inputs[id]) inputs[id].classList.add('field-intent');
+        inputs[current.id].classList.add("field-success");
+
+        moveNext();
+      }
+
+      function moveNext() {
+        stepIndex++;
+
+        if (stepIndex >= steps.length) {
+          clearHighlights();
+          speak(
+            "Please check the fields and click on submit to submit the form.",
+          );
+          showNotification("Form Ready");
+          return;
         }
 
-        function clearHighlights() {
-            Object.values(inputs).forEach(i => i.classList.remove('field-intent'));
-        }
+        askCurrentQuestion();
+      }
 
-        function startListening() {
-            if (!recognition) recognition = initRecognition();
-            if (!recognition) return;
-            isListening = true;
-            try { recognition.start(); } catch (e) {
-                // Fallback for already running state
-                micBtn.classList.add('listening');
-            }
-        }
+      function askCurrentQuestion() {
+        highlightField(steps[stepIndex].id);
 
-        function stopListening() {
-            isListening = false;
-            isGuided = false;
-            if (recognition) {
-                try { recognition.stop(); } catch(e) {}
-            }
-            window.speechSynthesis.cancel();
-        }
-
-        function handleFinalSubmit(e) {
-            if (e) e.preventDefault();
-            const data = {
-                name: inputs.fullName.value,
-                phone: inputs.phone.value,
-                email: inputs.email.value,
-                address: inputs.address.value
-            };
-            
-            if (!data.name || !data.phone) {
-                showNotification("Please fill at least Name and Phone.");
-                speak("Please provide your name and phone number before submitting.");
-                return;
-            }
-
-            console.log("Submitted Data:", data);
-            showNotification("🚀 Form Submitted Successfully!");
-            speak("Thank you. Your form has been submitted successfully.");
-            stopListening();
-            
-            // Visual reset
-            setTimeout(() => {
-                Object.values(inputs).forEach(i => i.value = "");
-                liveBox.innerText = "Form Reset. Tap mic to start again.";
-            }, 3000);
-        }
-
-        function capitalize(str) {
-            return str.replace(/\b\w/g, l => l.toUpperCase());
-        }
-
-        function showNotification(msg) {
-            notification.innerText = msg;
-            notification.classList.add('show');
-            setTimeout(() => notification.classList.remove('show'), 3000);
-        }
-
-        micBtn.addEventListener('click', () => {
-            if (isListening) {
-                stopListening();
-            } else {
-                startListening();
-                // Logic: check for first empty field to start flow
-                const firstEmpty = steps.findIndex(s => !inputs[s.id].value);
-                stepIndex = firstEmpty !== -1 ? firstEmpty : 0;
-                isGuided = true;
-                askQuestion();
-            }
+        speak(steps[stepIndex].question, () => {
+          startListening();
         });
+      }
+
+      /* ---------------- HELPERS ---------------- */
+
+      function highlightField(id) {
+        clearHighlights();
+        inputs[id].classList.add("field-intent");
+      }
+
+      function clearHighlights() {
+        Object.values(inputs).forEach((i) =>
+          i.classList.remove("field-intent"),
+        );
+      }
+
+      function resetForm(fromVoice = false) {
+        if (recognition && isListening) {
+          try {
+            recognition.stop();
+          } catch (e) {
+            console.log(e);
+          }
+        }
+
+        Object.values(inputs).forEach((input) => {
+          input.value = "";
+          input.classList.remove("field-success");
+          input.classList.remove("field-intent");
+        });
+
+        clearHighlights();
+        stepIndex = 0;
+
+        micBtn.classList.remove("listening");
+        statusText.innerText = "Ready";
+
+        if (fromVoice) {
+          speak("Form cleared. Enter full name.", () => {
+            startListening();
+          });
+        } else {
+          liveBox.innerText = "Tap the microphone to begin...";
+        }
+      }
+      function capitalize(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+      }
+
+      function lowercase(str) {
+        return str.toLowerCase() + str.slice(1);
+      }
+
+      function showNotification(msg) {
+        notification.innerText = msg;
+        notification.classList.add("show");
+        setTimeout(() => notification.classList.remove("show"), 3000);
+      }
+
+      function handleFinalSubmit(e) {
+        if (e) e.preventDefault();
+
+        const isEmpty = Object.values(inputs).some(
+          (input) => input.value.trim() === "",
+        );
+
+        if (isEmpty) {
+          speak("Some fields are missing.");
+          showNotification("⚠️ Incomplete Form");
+          return;
+        }
+
+        speak("Form submitted successfully.", () => {
+          showNotification("🚀 Submitted Successfully");
+          resetForm(false); // auto reset after submit
+        });
+      }
+      /* ---------------- BUTTON ---------------- */
+
+      micBtn.addEventListener("click", () => {
+        stepIndex = 0;
+        askCurrentQuestion();
+      });
     </script>
-</body>
+  </body>
 </html>
