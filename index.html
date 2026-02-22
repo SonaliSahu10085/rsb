@@ -483,11 +483,7 @@
             .replace(/dot/g, ".");
         }
 
-        if (current.id === "email") {
-          inputs[current.id].value = lowercase(value);
-        } else {
-          inputs[current.id].value = capitalize(value);
-        }
+        inputs[current.id].value = capitalize(value);
 
         inputs[current.id].classList.add("field-success");
 
