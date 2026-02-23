@@ -77,6 +77,8 @@
       .live-transcription-container {
         position: relative;
         margin-bottom: 2rem;
+        display: flex;
+        column-gap: 1rem;
       }
 
       .live-transcription {
@@ -95,6 +97,7 @@
         justify-content: center;
         text-align: center;
         overflow-wrap: break-word;
+        flex-grow: 1;
       }
 
       .live-transcription.active {
@@ -283,6 +286,24 @@
         <div id="liveTranscription" class="live-transcription">
           Tap the microphone to begin...
         </div>
+
+        <div class="controls">
+          <button id="micBtn" class="mic-btn">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+              <line x1="12" x2="12" y1="19" y2="22" />
+            </svg>
+          </button>
+          <div id="statusText" class="status-text">Ready</div>
+        </div>
       </div>
 
       <form
@@ -312,24 +333,6 @@
 
         <button type="submit" class="btn-submit">Submit Form</button>
       </form>
-
-      <div class="controls">
-        <button id="micBtn" class="mic-btn">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
-            <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-            <line x1="12" x2="12" y1="19" y2="22" />
-          </svg>
-        </button>
-        <div id="statusText" class="status-text">Ready</div>
-      </div>
 
       <!-- <div class="hints-container">
         <strong>Voice Shortcuts:</strong><br />
@@ -495,9 +498,7 @@
 
         if (stepIndex >= steps.length) {
           clearHighlights();
-          speak(
-            "Please check the fields and click on submit to submit the form.",
-          );
+          speak("Please check the fields and click on submit.");
           showNotification("Form Ready");
           return;
         }
@@ -569,22 +570,55 @@
         setTimeout(() => notification.classList.remove("show"), 3000);
       }
 
+      // function handleFinalSubmit(e) {
+      //   if (e) e.preventDefault();
+
+      //   const isEmpty = Object.values(inputs).some(
+      //     (input) => input.value.trim() === "",
+      //   );
+
+      //   if (isEmpty) {
+      //     speak("Some fields are missing.");
+      //     showNotification("⚠️ Incomplete Form");
+      //     return;
+      //   }
+
+      //   speak("Form submitted successfully.", () => {
+      //     showNotification("🚀 Submitted Successfully");
+      //     resetForm(false); // auto reset after submit
+      //   });
+      // }
+
       function handleFinalSubmit(e) {
         if (e) e.preventDefault();
 
-        const isEmpty = Object.values(inputs).some(
-          (input) => input.value.trim() === "",
-        );
+        const emptyFields = [];
 
-        if (isEmpty) {
-          speak("Some fields are missing.");
-          showNotification("⚠️ Incomplete Form");
+        // Check each field
+        if (!inputs.fullName.value.trim()) emptyFields.push("full name");
+        if (!inputs.phone.value.trim()) emptyFields.push("phone number");
+        if (!inputs.email.value.trim()) emptyFields.push("email address");
+        if (!inputs.address.value.trim()) emptyFields.push("full address");
+
+        // 🔴 Case 1: All fields missing
+        if (emptyFields.length === steps.length) {
+          speak("All fields are missing.");
+          showNotification("⚠️ All Fields Missing");
           return;
         }
 
+        // 🟡 Case 2: Some fields missing
+        if (emptyFields.length > 0) {
+          const firstMissing = emptyFields[0];
+          speak("Enter " + firstMissing + ".");
+          showNotification("⚠️ Missing: " + firstMissing);
+          return;
+        }
+
+        // 🟢 Case 3: All good → submit + reset
         speak("Form submitted successfully.", () => {
           showNotification("🚀 Submitted Successfully");
-          resetForm(false); // auto reset after submit
+          resetForm(false);
         });
       }
       /* ---------------- BUTTON ---------------- */
