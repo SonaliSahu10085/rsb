@@ -306,11 +306,7 @@
         </div>
       </div>
 
-      <form
-        id="voiceForm"
-        autocomplete="off"
-        onsubmit="handleFinalSubmit(event)"
-      >
+      <form id="voiceForm" autocomplete="off">
         <div class="form-group" id="group-fullName">
           <label for="fullName">Full Name</label>
           <input type="text" id="fullName" placeholder="Waiting for input..." />
@@ -331,7 +327,9 @@
           <input type="text" id="address" placeholder="Waiting for input..." />
         </div>
 
-        <button type="submit" class="btn-submit">Submit Form</button>
+        <button type="submit" class="btn-submit" id="submitBtn">
+          Submit Form
+        </button>
       </form>
 
       <!-- <div class="hints-container">
@@ -356,6 +354,7 @@
 
       // DOM
       const micBtn = document.getElementById("micBtn");
+      const submitBtn = document.getElementById("submitBtn");
       const statusText = document.getElementById("statusText");
       const liveBox = document.getElementById("liveTranscription");
       const notification = document.getElementById("notification");
@@ -379,6 +378,7 @@
       let stepIndex = 0;
       let isListening = false;
       let isBotSpeaking = false;
+      let event = null;
 
       /* ---------------- SPEECH SYNTHESIS ---------------- */
 
@@ -459,6 +459,7 @@
         // RESET COMMAND
         if (text.includes("reset") || text.includes("clear")) {
           showNotification("🔄 Resetting Form...");
+          stepIndex = 0;
           resetForm(true);
           return;
         }
@@ -466,7 +467,7 @@
         // SUBMIT COMMAND
         if (text.includes("submit") || text.includes("finish")) {
           showNotification("📤 Submitting Form...");
-          handleFinalSubmit();
+          handleFinalSubmit(event);
           return;
         }
 
@@ -543,15 +544,12 @@
         });
 
         clearHighlights();
-        stepIndex = 0;
 
         micBtn.classList.remove("listening");
         statusText.innerText = "Ready";
 
         if (fromVoice) {
-          speak("Form cleared. Enter full name.", () => {
-            startListening();
-          });
+          speak("Form cleared.");
         } else {
           liveBox.innerText = "Tap the microphone to begin...";
         }
@@ -570,35 +568,41 @@
         setTimeout(() => notification.classList.remove("show"), 3000);
       }
 
-      // function handleFinalSubmit(e) {
-      //   if (e) e.preventDefault();
-
-      //   const isEmpty = Object.values(inputs).some(
-      //     (input) => input.value.trim() === "",
-      //   );
-
-      //   if (isEmpty) {
-      //     speak("Some fields are missing.");
-      //     showNotification("⚠️ Incomplete Form");
-      //     return;
-      //   }
-
-      //   speak("Form submitted successfully.", () => {
-      //     showNotification("🚀 Submitted Successfully");
-      //     resetForm(false); // auto reset after submit
-      //   });
-      // }
-
       function handleFinalSubmit(e) {
-        if (e) e.preventDefault();
+        // 🟢 Case 3: All good → submit + reset
+        speak("Form submitted successfully.", () => {
+          showNotification("🚀 Submitted Successfully");
+          resetForm(true);
+        });
+      }
+      /* ---------------- BUTTON ---------------- */
 
+      micBtn.addEventListener("click", () => {
+        askCurrentQuestion();
+      });
+
+      submitBtn.addEventListener("click", (e) => {
+        if (e) e.preventDefault();
+        event = e;
         const emptyFields = [];
 
         // Check each field
-        if (!inputs.fullName.value.trim()) emptyFields.push("full name");
-        if (!inputs.phone.value.trim()) emptyFields.push("phone number");
-        if (!inputs.email.value.trim()) emptyFields.push("email address");
-        if (!inputs.address.value.trim()) emptyFields.push("full address");
+        if (!inputs.fullName.value.trim()) {
+          emptyFields.push("full name");
+          stepIndex = 0;
+        }
+        if (!inputs.phone.value.trim()) {
+          emptyFields.push("phone number");
+          stepIndex = 1;
+        }
+        if (!inputs.email.value.trim()) {
+          emptyFields.push("email address");
+          stepIndex = 2;
+        }
+        if (!inputs.address.value.trim()) {
+          emptyFields.push("full address");
+          stepIndex = 3;
+        }
 
         // 🔴 Case 1: All fields missing
         if (emptyFields.length === steps.length) {
@@ -615,17 +619,9 @@
           return;
         }
 
-        // 🟢 Case 3: All good → submit + reset
-        speak("Form submitted successfully.", () => {
-          showNotification("🚀 Submitted Successfully");
-          resetForm(false);
+        speak("Are you sure? Say Submit.", () => {
+          startListening();
         });
-      }
-      /* ---------------- BUTTON ---------------- */
-
-      micBtn.addEventListener("click", () => {
-        stepIndex = 0;
-        askCurrentQuestion();
       });
     </script>
   </body>
