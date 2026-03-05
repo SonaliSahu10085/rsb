@@ -499,7 +499,9 @@
 
         if (stepIndex >= steps.length) {
           clearHighlights();
-          speak("Please check the fields and click on submit.");
+          speak("Please check the fields and say submit.", () => {
+            startListening();
+          });
           showNotification("Form Ready");
           return;
         }
@@ -550,6 +552,7 @@
 
         if (fromVoice) {
           speak("Form cleared.");
+          stepIndex = 0;
         } else {
           liveBox.innerText = "Tap the microphone to begin...";
         }
@@ -619,9 +622,8 @@
           return;
         }
 
-        speak("Are you sure? Say Submit.", () => {
-          startListening();
-        });
+        showNotification("📤 Submitting Form...");
+        handleFinalSubmit(event);
       });
     </script>
   </body>
