@@ -58,7 +58,7 @@
 
       header {
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: 1rem;
       }
 
       header h1 {
@@ -69,28 +69,25 @@
         letter-spacing: -0.025em;
       }
 
-      header p {
-        color: var(--text-muted);
-        font-size: 0.95rem;
-      }
-
       .live-transcription-container {
         position: relative;
-        margin-bottom: 2rem;
+        margin-bottom: 1rem;
         display: flex;
         column-gap: 1rem;
+        align-items: center;
+        justify-content: center;
       }
 
       .live-transcription {
         background: #f1f5f9;
         border-radius: 1rem;
-        padding: 0.8rem;
-        min-height: 80px;
+        padding: 0.4rem;
+        height: 56px;
         border: 2px solid var(--border);
         font-style: italic;
         color: var(--text-muted);
-        font-size: 1.1rem;
-        line-height: 1.5;
+        font-size: 1rem;
+        line-height: 1;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         display: flex;
         align-items: center;
@@ -160,11 +157,12 @@
         align-items: center;
         gap: 0.75rem;
         margin-top: 2rem;
+        justify-content: center;
       }
 
       .mic-btn {
-        width: 75px;
-        height: 75px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         border: none;
         background: var(--primary);
@@ -179,8 +177,8 @@
       }
 
       .mic-btn svg {
-        width: 30px;
-        height: 30px;
+        width: 20px;
+        height: 20px;
       }
 
       .mic-btn.listening {
@@ -231,7 +229,7 @@
         color: white;
         padding: 0.75rem 1.5rem;
         border-radius: 2rem;
-        font-size: 0.875rem;
+        font-size: 0.8rem;
         transition: transform 0.4s ease;
         z-index: 1000;
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
@@ -279,7 +277,6 @@
 
       <header>
         <h1>Voice Form Pro</h1>
-        <p>Guided & Smart Speech Input</p>
       </header>
 
       <div class="live-transcription-container">
@@ -336,10 +333,10 @@
         • "Submit" or "Finish" to send form.<br />
         • Or just answer the questions as they come.
       </div> -->
-      <div class="hints-container">
+      <!-- <div class="hints-container">
         <strong>Note:</strong>
         Only supported to chrome browswer for now.
-      </div>
+      </div> -->
     </div>
 
     <div id="notification">Notification message</div>
