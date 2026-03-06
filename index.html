@@ -86,11 +86,12 @@
         font-size: 1rem;
         line-height: 1;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        display: flex;
+        display: none;
         align-items: center;
         justify-content: center;
         overflow-wrap: break-word;
         flex-grow: 1;
+
       }
 
       .live-transcription.active {
@@ -271,9 +272,9 @@
       </header>
 
       <div class="live-transcription-container">
-        <!-- <div id="liveTranscription" class="live-transcription">
+        <div id="liveTranscription" class="live-transcription">
           Tap start button for voice input...
-        </div> -->
+        </div>
 
         <div class="controls">
           <button id="micBtn" class="mic-btn">
@@ -535,7 +536,7 @@
         statusText.innerText = "Continue";
 
         if (fromVoice) {
-          // speak("Form cleared.");
+          speak("Form cleared.");
           liveBox.innerText = "Tap the microphone to begin...";
           stepIndex = 0;
         } else {
