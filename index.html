@@ -41,14 +41,14 @@
         justify-content: center;
         align-items: center;
         min-height: 100vh;
-        padding: 20px;
+        padding: 10px;
       }
 
       .container {
         width: 100%;
         max-width: 550px;
         background: var(--card-bg);
-        padding: 2.5rem;
+        padding: 1.5rem;
         border-radius: 1.5rem;
         box-shadow:
           0 20px 25px -5px rgba(0, 0, 0, 0.1),
@@ -84,8 +84,8 @@
       .live-transcription {
         background: #f1f5f9;
         border-radius: 1rem;
-        padding: 1.25rem;
-        min-height: 100px;
+        padding: 0.8rem;
+        min-height: 80px;
         border: 2px solid var(--border);
         font-style: italic;
         color: var(--text-muted);
@@ -302,29 +302,27 @@
               <line x1="12" x2="12" y1="19" y2="22" />
             </svg>
           </button>
-          <div id="statusText" class="status-text">Ready</div>
+          <div id="statusText" class="status-text">Start</div>
         </div>
       </div>
 
       <form id="voiceForm" autocomplete="off">
         <div class="form-group" id="group-fullName">
-          <label for="fullName">Full Name</label>
-          <input type="text" id="fullName" placeholder="Waiting for input..." />
+          <input type="text" id="fullName" placeholder="Full Name" />
         </div>
 
         <div class="form-group" id="group-phone">
-          <label for="phone">Phone Number</label>
-          <input type="tel" id="phone" placeholder="Waiting for input..." />
+          <input type="tel" id="phone" placeholder="Phone Number" />
         </div>
 
         <div class="form-group" id="group-email">
-          <label for="email">Email Address</label>
-          <input type="email" id="email" placeholder="Waiting for input..." />
+          <!-- <label for="email">Email Address</label> -->
+          <input type="email" id="email" placeholder="Email Address" />
         </div>
 
         <div class="form-group" id="group-address">
-          <label for="address">Full Address</label>
-          <input type="text" id="address" placeholder="Waiting for input..." />
+          <!-- <label for="address">Full Address</label> -->
+          <input type="text" id="address" placeholder="Address" />
         </div>
 
         <button type="submit" class="btn-submit" id="submitBtn">
@@ -436,7 +434,7 @@
         rec.onend = () => {
           isListening = false;
           micBtn.classList.remove("listening");
-          statusText.innerText = "Ready";
+          statusText.innerText = "Continue";
         };
 
         return rec;
@@ -466,8 +464,7 @@
 
         // SUBMIT COMMAND
         if (text.includes("submit") || text.includes("finish")) {
-          showNotification("📤 Submitting Form...");
-          handleFinalSubmit(event);
+          submitBtn.click();
           return;
         }
 
@@ -546,12 +543,12 @@
         });
 
         clearHighlights();
-
         micBtn.classList.remove("listening");
-        statusText.innerText = "Ready";
+        statusText.innerText = "Continue";
 
         if (fromVoice) {
           speak("Form cleared.");
+          liveBox.innerText = "Tap the microphone to begin...";
           stepIndex = 0;
         } else {
           liveBox.innerText = "Tap the microphone to begin...";
@@ -581,12 +578,25 @@
       /* ---------------- BUTTON ---------------- */
 
       micBtn.addEventListener("click", () => {
+        if (stepIndex >= steps.length) {
+          clearHighlights();
+          speak("Please check the fields and say submit.", () => {
+            startListening();
+          });
+          showNotification("Form Ready");
+          return;
+        }
+
         askCurrentQuestion();
       });
 
       submitBtn.addEventListener("click", (e) => {
+        validate(e);
+      });
+
+      function validate(e) {
         if (e) e.preventDefault();
-        event = e;
+
         const emptyFields = [];
 
         // Check each field
@@ -611,6 +621,7 @@
         if (emptyFields.length === steps.length) {
           speak("All fields are missing.");
           showNotification("⚠️ All Fields Missing");
+          stepIndex = 0;
           return;
         }
 
@@ -624,7 +635,7 @@
 
         showNotification("📤 Submitting Form...");
         handleFinalSubmit(event);
-      });
+      }
     </script>
   </body>
 </html>
