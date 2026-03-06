@@ -70,7 +70,7 @@
         position: relative;
         margin-bottom: 1rem;
         display: flex;
-        column-gap: 1.7rem;
+        column-gap: 1rem;
         align-items: center;
         justify-content: center;
       }
@@ -271,9 +271,9 @@
       </header>
 
       <div class="live-transcription-container">
-        <div id="liveTranscription" class="live-transcription">
-          Tap the microphone to begin...
-        </div>
+        <!-- <div id="liveTranscription" class="live-transcription">
+          Tap start button for voice input...
+        </div> -->
 
         <div class="controls">
           <button id="micBtn" class="mic-btn">
@@ -535,7 +535,7 @@
         statusText.innerText = "Continue";
 
         if (fromVoice) {
-          speak("Form cleared.");
+          // speak("Form cleared.");
           liveBox.innerText = "Tap the microphone to begin...";
           stepIndex = 0;
         } else {
