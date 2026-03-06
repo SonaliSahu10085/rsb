@@ -356,8 +356,8 @@
       const steps = [
         { id: "fullName", question: "Enter full name." },
         { id: "phone", question: "Enter phone number." },
-        { id: "email", question: "Enter email address." },
-        { id: "address", question: "Enter full address." },
+        { id: "email", question: "Enter email." },
+        { id: "address", question: "Enter address." },
       ];
 
       // State
@@ -485,7 +485,7 @@
 
         if (stepIndex >= steps.length) {
           clearHighlights();
-          speak("Please check the fields and say submit.", () => {
+          speak("Please check values and say submit.", () => {
             startListening();
           });
           showNotification("Form Ready");
